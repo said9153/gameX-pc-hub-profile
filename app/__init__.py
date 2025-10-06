@@ -1,42 +1,27 @@
 from flask import Flask
-import os, json
-
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data.json")
-
-def default_payload():
-    return {"products": [], "seq": 1}
-
-def ensure_data_file():
-    """
-    Create or repair app/data.json.
-    - If file missing -> create with default.
-    - If file empty/invalid -> overwrite with default.
-    """
-    os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
-    needs_write = False
-    if not os.path.exists(DATA_PATH):
-        needs_write = True
-    else:
-        try:
-            # If empty file or invalid JSON -> except block
-            with open(DATA_PATH, "r", encoding="utf-8") as f:
-                txt = f.read().strip()
-                if not txt:
-                    needs_write = True
-                else:
-                    json.loads(txt)
-        except Exception:
-            needs_write = True
-
-    if needs_write:
-        with open(DATA_PATH, "w", encoding="utf-8") as f:
-            json.dump(default_payload(), f, ensure_ascii=False, indent=2)
+from .models import create_db_and_tables, get_engine
+import os
 
 def create_app():
-    ensure_data_file()
+    """
+    Flask application factory.
+    - Uses DATABASE_URL from environment variable if provided.
+    - Automatically creates tables on startup.
+    """
     app = Flask(__name__, template_folder="templates")
-    app.secret_key = "supersecretkey-change-this"
+    app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey-change-this")
 
+    # Initialize SQLAlchemy tables
+    engine = get_engine()
+    create_db_and_tables(engine)
+
+    # Register main blueprint
     from .route import main
     app.register_blueprint(main)
+
+    # Optional: Root sanity route
+    @app.route("/ping")
+    def ping():
+        return {"status": "ok", "message": "GameX API running"}
+
     return app
