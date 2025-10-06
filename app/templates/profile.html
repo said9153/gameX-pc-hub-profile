@@ -1,316 +1,798 @@
+
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <title>{{ p.brand }} — Digital Profile</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0b0f1a">
-<script src="https://cdn.tailwindcss.com"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0b0f1a" />
 <style>
   :root{
-    --bg1:#0b0f1a; --bg2:#141a2a;
+    --bg1:#070914; --bg2:#0f1724;
     --accent:#77e6ff; --accent2:#9d7bff;
-    --blur:18px; --radius:18px;
+    --glass: rgba(255,255,255,.06);
+    --muted:#9fb3d6;
+    --radius:14px; --blur:12px;
+    --nav-bg: rgba(255,255,255,.04);
+    --nav-active: rgba(119,230,255,.10);
   }
+  html,body{height:100%;margin:0;padding:0;box-sizing:border-box;}
+  *,*::before,*::after{box-sizing:inherit;}
   body{
+    color:#EAF6FF;
+    font-family:Inter, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
     background:
-      radial-gradient(1200px 600px at 10% -10%, #1b2440 0%, transparent 60%),
-      radial-gradient(1000px 500px at 110% 10%, #212b54 0%, transparent 65%),
+      radial-gradient(900px 340px at 6% -20%, rgba(24,36,72,.48) 0%, transparent 50%),
       linear-gradient(180deg,var(--bg1),var(--bg2));
-    color:#eaf2ff;
-    font-family: system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+    padding-bottom:6.5rem;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.35;
   }
+  .container{ max-width:1100px; margin:0 auto; padding:18px; }
+
+  /* GLASS */
   .glass{
-    background: rgba(255,255,255,.08);
+    background: var(--glass);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,.06);
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
-    border:1px solid rgba(255,255,255,.14);
-    border-radius: var(--radius);
-    box-shadow: 0 12px 32px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.08);
-    position:relative;
+    box-shadow: 0 12px 30px rgba(0,0,0,.6);
+    position:relative; overflow:hidden;
   }
-  .glass:after{
-    content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
-    background: linear-gradient(135deg, rgba(119,230,255,.24), rgba(157,123,255,.2));
-    filter: blur(20px); opacity:.35; z-index:-1;
+  .glass::before{
+    content:""; position:absolute; inset:-2px; z-index:-1; filter:blur(14px);
+    background: linear-gradient(135deg, rgba(119,230,255,.03), rgba(157,123,255,.02));
   }
-  .chip{ background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#0b1120; font-weight:700; font-size:12px; padding:6px 12px; border-radius:999px; box-shadow:0 0 24px rgba(119,230,255,.35) }
-  .btn-glass{ background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:12px; text-align:center; font-weight:700; transition:.2s }
-  .btn-glass:hover{ transform:translateY(-1px); box-shadow:0 0 20px rgba(119,230,255,.35) }
-  .ring-accent{ box-shadow:0 0 0 2px rgba(119,230,255,.45) }
-  .shadow-neon{ box-shadow:0 8px 24px rgba(119,230,255,.18) }
-  .link{ text-decoration:none }
-  .admin-pill{ position:fixed; bottom:16px; right:16px; z-index:50 }
-  .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55) }
-  .modal[open]{ display:flex }
+
+  /* header/brand */
+  .brand-row{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .logo{ width:56px; height:56px; border-radius:12px; object-fit:cover; border:1px solid rgba(255,255,255,.08); box-shadow:0 8px 24px rgba(119,230,255,.04); background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); }
+  .chip{ display:inline-block; padding:6px 12px; border-radius:999px; background: linear-gradient(90deg,var(--accent),var(--accent2)); color:#04101a; font-weight:800; font-size:13px; }
+  .title-strong{ font-weight:800; font-size:16px; line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:420px; }
+  .muted{ color:var(--muted); font-size:13px; }
+
+  /* buttons */
+  .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; border:1px solid rgba(255,255,255,.06); transition:transform .14s ease, box-shadow .14s ease, opacity .14s, background .14s; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); color:inherit; text-decoration:none; }
+  .btn:active{ transform:translateY(1px); }
+  .btn--primary{ background: linear-gradient(90deg,var(--accent),var(--accent2)); color:#04101a; border:none; box-shadow:0 10px 30px rgba(119,230,255,.08); }
+  .btn--ghost{ background:transparent; border:1px dashed rgba(255,255,255,.04); color:var(--muted); }
+
+  .avatar{ width:96px; height:96px; border-radius:999px; object-fit:cover; border:1px solid rgba(255,255,255,.08); box-shadow:0 10px 30px rgba(119,230,255,.06); }
+
+  .actions-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  @media(min-width:640px){ .actions-grid{ grid-template-columns:repeat(4,1fr); } }
+  .social-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .contact-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .products-grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr); }
+  @media(min-width:980px){ .products-grid{ grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:320px){ .products-grid{ grid-template-columns:repeat(1,1fr); } }
+
+  .product-card{ border-radius:12px; overflow:hidden; background:linear-gradient(180deg, rgba(255,255,255,.01), rgba(0,0,0,.02)); display:flex; flex-direction:column; cursor:pointer; transition: transform .14s, box-shadow .14s; min-height:260px; }
+  .product-card:hover{ transform:translateY(-6px); box-shadow:0 18px 60px rgba(0,0,0,.6); }
+  .product-photo{ width:100%; height:170px; object-fit:cover; display:block; background:rgba(255,255,255,.02); }
+  .product-body{ padding:12px; display:flex; flex-direction:column; gap:10px; flex:1 1 auto; }
+  .meta{ font-size:12px; color:var(--muted); }
+  .title-clamp{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.05; font-weight:800; font-size:15px; }
+  .desc-clamp{ display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; line-height:1.25; color:var(--muted); }
+  .card-actions{ margin-top:auto; display:flex; gap:8px; align-items:center; }
+
+  .overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); z-index:60; padding:16px; }
+  .overlay.show{ display:flex; }
+  .modal{ width:100%; max-width:920px; border-radius:12px; overflow:hidden; background:linear-gradient(180deg,#0a0c11,#071022); color:#eaf6ff; box-shadow:0 30px 80px rgba(0,0,0,.7); }
+  .modal-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  @media(max-width:820px){ .modal-grid{ grid-template-columns:1fr; } }
+  .photo-large{ width:100%; height:420px; object-fit:cover; background:rgba(255,255,255,.02); }
+  @media(max-width:820px){ .photo-large{ height:260px; } }
+  .modal-content{ padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .detail-title{ font-weight:900; font-size:20px; line-height:1.05; }
+  .detail-desc{ color:var(--muted); line-height:1.4; white-space:pre-wrap; }
+  .close-x{ background:transparent; border:0; color:#eaf6ff; font-size:20px; cursor:pointer; padding:6px 8px; }
+
+  dialog.modal-dialog{ width:92%; max-width:640px; border-radius:12px; border:none; padding:0; background:transparent; }
+  dialog.modal-dialog .glass{ width:100%; }
+  input[type="text"], input[type="url"], input[type="password"], textarea, select{ width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(0,0,0,.12); font-size:14px; box-sizing:border-box; }
+  textarea{ resize:vertical; min-height:100px; }
+
+  nav.bottom-nav{ position:fixed; bottom:12px; left:12px; right:12px; z-index:70; }
+  .nav-wrap{ display:flex; gap:8px; justify-content:space-between; align-items:center; padding:10px; border-radius:16px; background: var(--nav-bg); border:1px solid rgba(255,255,255,.06); backdrop-filter: blur(6px); box-shadow:0 10px 30px rgba(0,0,0,.45); }
+  .nav-item{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px 10px; flex:1; text-decoration:none; color:inherit; border-radius:10px; transition:transform .12s, background .12s, box-shadow .12s; text-align:center; }
+  .nav-item:hover{ background:var(--nav-active); }
+  .nav-icon-wrap{ width:44px; height:44px; border-radius:10px; display:grid; place-items:center; background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.04); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  .nav-label{ font-size:12px; font-weight:700; }
+  .footer-space{ height:90px; }
+
+  .flash-wrap{ position:fixed; bottom:12px; right:12px; z-index:100; display:flex; flex-direction:column; gap:8px; }
+  .flash{ padding:10px 14px; border-radius:10px; color:#fff; font-weight:700; box-shadow:0 6px 18px rgba(0,0,0,.45); }
+  .flash.success{ background:#10B981; } .flash.error{ background:#EF4444; } .flash.info{ background:#3B82F6; }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* Bottom nav base (keep layout fixed) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 8px 10px;
+  backdrop-filter: blur(8px);
+  background: rgba(6, 10, 14, 0.45);
+  border-top: 1px solid rgba(0, 200, 255, 0.06);
+  z-index: 99;
+}
+
+/* nav wrap */
+.nav-wrap {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* nav item - no movement, keep label centered */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #cfeaff;
+  font-size: 12.5px;
+  gap: 6px;
+  padding: 4px;
+  transition: color 180ms ease;
+}
+
+/* icon container: only light-blue border (neo) */
+.nav-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent; /* no fill, just border */
+  border: 1.6px solid rgba(0, 200, 255, 0.6); /* light-blue border */
+  box-shadow: 0 0 6px rgba(0, 200, 255, 0.10); /* faint idle glow */
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+  flex-shrink: 0;
+}
+
+/* ensure SVG icons are plain white strokes (no color fill) */
+.nav-icon-wrap svg {
+  width: 20px;
+  height: 20px;
+  stroke: #ffffff;
+  fill: none;
+  stroke-width: 1.6;
+  display: block;
+  opacity: 0.95;
+}
+
+/* label color and no movement on hover */
+.nav-item .nav-label {
+  line-height: 1;
+  color: #d7f3ff;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Hover: brighten border and show stronger glow (visual only) */
+.nav-item:hover .nav-icon-wrap {
+  border-color: rgba(0, 255, 255, 0.95);
+  box-shadow: 0 0 14px rgba(0, 210, 255, 0.45), 0 0 30px rgba(0, 150, 255, 0.18);
+}
+
+/* Hover: label slightly brighter (no movement) */
+.nav-item:hover .nav-label {
+  color: #ffffff;
+}
+
+/* Active (click) effect: subtle inner darken, no scale/translate */
+.nav-item:active .nav-icon-wrap {
+  box-shadow: 0 0 8px rgba(0, 200, 255, 0.25);
+  background: rgba(255,255,255,0.01);
+}
+
+/* Keep spacing safe on mobile so content not hidden behind nav */
+body {
+  padding-bottom: 72px;
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 480px) {
+  .nav-icon-wrap { width: 34px; height: 34px; border-radius: 9px; }
+  .nav-wrap { gap: 6px; }
+  .nav-item { font-size: 11.5px; }
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* Layout same rakha holo (2x2 grid) */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Base button styling */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05); /* slight glass background */
+  border: 1.8px solid rgba(0, 200, 255, 0.6); /* light blue border */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 8px rgba(0, 200, 255, 0.25); /* soft outer glow */
+  transition: all 0.25s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Icon color (white) */
+.btn svg {
+  stroke: #ffffff;
+  fill: none;
+  opacity: 0.95;
+  width: 16px;
+  height: 16px;
+}
+
+/* Hover effect — glow increases, border brighter */
+.btn:hover {
+  border-color: rgba(0, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5),
+              0 0 25px rgba(0, 180, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Active (click) effect — subtle dim press */
+.btn:active {
+  filter: brightness(0.9);
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+}
+
+/* Optional subtle shine animation on hover */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.25), rgba(255,255,255,0));
+  transform: skewX(-25deg);
+  transition: 0.6s;
+}
+.btn:hover::after {
+  left: 125%;
+}
+
+/* Same color for all 4 buttons */
+.actions-grid a:nth-child(1),
+.actions-grid a:nth-child(2),
+.actions-grid a:nth-child(3),
+.actions-grid a:nth-child(4) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 200, 255, 0.6);
+  box-shadow: 0 0 8px rgba(0, 200, 255, 0.25);
+}
+
+/* Responsive: 2x2 stays same */
+@media (max-width: 600px) {
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* Keep your layout intact */
+.social-grid a.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0d1b2a;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  transition: all 0.25s ease;
+  text-align: center;
+}
+
+/* Hover effect — neon glow and color change */
+.social-grid a.btn:hover {
+  background: linear-gradient(135deg, #00eaff, #007bff);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.6),
+              0 0 20px rgba(0, 150, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Click (active) effect — subtle press */
+.social-grid a.btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 5px rgba(0, 200, 255, 0.3);
+}
+
+/* WhatsApp button special glow */
+a[href*="wa"] {
+  background: #004d26;
+  border: 1px solid rgba(0, 255, 150, 0.3);
+}
+a[href*="wa"]:hover {
+  background: linear-gradient(135deg, #00ff99, #00cc66);
+  box-shadow: 0 0 10px rgba(0, 255, 180, 0.5);
+}
+
+/* Text always perfectly centered even if text changes */
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+  
+  
+  
+  
+  
+
+  @media(max-width:420px){
+    .logo{ width:48px; height:48px; } .avatar{ width:84px; height:84px; } .btn{ padding:9px 10px; font-size:13px; } .product-photo{ height:140px; } .nav-wrap{ padding:8px; } .nav-icon-wrap{ width:40px; height:40px; } .title-strong{ font-size:15px; }
+  }
 </style>
 </head>
-<body class="antialiased selection:bg-cyan-300/20 selection:text-white">
+<body>
+  <div class="container">
 
-<div class="mx-auto max-w-lg md:max-w-3xl lg:max-w-5xl px-3 sm:px-4 md:px-6 py-5">
-
-  <!-- Header -->
-  <header class="glass p-5">
-    <div class="flex items-center gap-3">
-      {% if p.logo %}
-        <img src="{{ p.logo }}" alt="logo" class="w-12 h-12 rounded-xl object-cover border border-white/20 shadow-neon">
-      {% else %}
-        <div class="w-12 h-12 rounded-xl chip grid place-items-center">GX</div>
-      {% endif %}
-      <div class="min-w-0">
-        <h1 class="text-xl sm:text-2xl font-extrabold truncate">{{ p.brand }}</h1>
-        <p class="text-slate-300/85 text-xs sm:text-sm">{{ p.tagline }}</p>
-      </div>
-      <a href="tel:{{ p.phone_raw }}" class="ml-auto hidden sm:inline-flex chip rounded-full">📞 {{ p.phone_display }}</a>
-    </div>
-
-    <div class="grid place-items-center mt-4">
-      {% if p.avatar %}
-        <img src="{{ p.avatar }}" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border border-white/25 ring-accent shadow-neon" alt="avatar">
-      {% else %}
-        <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full grid place-items-center border border-white/25 ring-accent shadow-neon text-3xl font-bold bg-white/5">👤</div>
-      {% endif %}
-    </div>
-
-    <!-- Quick actions -->
-    <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-      <a class="btn-glass" href="tel:{{ p.phone_raw }}">Call</a>
-      <a class="btn-glass" href="https://wa.me/{{ p.phone_raw|replace('+','') }}?text=Hi%20{{ p.brand|replace(' ','%20') }}">WhatsApp</a>
-      <a class="btn-glass" href="mailto:{{ p.email }}">Email</a>
-      <a class="btn-glass" href="{{ p.maps_link }}">Maps</a>
-    </div>
-  </header>
-
-  <!-- Social / Group / Add to contacts -->
-  <section class="mt-4 grid gap-4 sm:grid-cols-2">
-    <div class="glass p-4">
-      <div class="chip inline-block">Social</div>
-      <div class="mt-3 grid grid-cols-2 gap-2">
-        <a class="btn-glass" href="{{ p.instagram }}">Instagram</a>
-        <a class="btn-glass" href="{{ p.facebook }}">Facebook</a>
-        <a class="btn-glass" href="{{ p.youtube }}">YouTube</a>
-        <a class="btn-glass" href="{{ p.map_review }}">Map Review</a>
-      </div>
-      <a class="btn-glass mt-3 block" href="{{ p.wa_group }}">WhatsApp Group</a>
-    </div>
-
-    <div class="glass p-4">
-      <div class="chip inline-block">Contact Card</div>
-      <p class="mt-2 text-sm text-slate-300/85">Save our contact or share this profile.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-        <a class="btn-glass" href="{{ url_for('main.profile') }}vcard.vcf" onclick="event.preventDefault(); downloadVCF();">Add to Contacts</a>
-        <button class="btn-glass" id="shareBtn">Share Profile</button>
-      </div>
-      <div class="mt-2 text-xs text-slate-400">Saved name: <b>{{ p.brand }}</b> • {{ p.phone_display }}</div>
-    </div>
-  </section>
-
-  <!-- Products -->
-  <section class="mt-4 glass p-4">
-    <div class="flex items-center justify-between flex-wrap gap-2">
-      <div class="chip">View Recent Products</div>
-      <div class="flex items-center gap-2">
-        <a class="btn-glass" href="{{ url_for('main.products') }}">View All Categories</a>
-
-        {% if admin %}
-          <button class="btn-glass" onclick="openAddModal()">➕ Add Product</button>
+    <!-- Header -->
+    <header class="glass" style="padding:16px;">
+      <div class="brand-row">
+        {% if p.logo %}
+          <img src="{{ p.logo }}" alt="logo" class="logo">
         {% else %}
-          <button class="btn-glass" onclick="openPin()">🔑 Admin</button>
+          <div class="logo chip" style="display:grid;place-items:center;font-weight:900;">GX</div>
+        {% endif %}
+        <div style="min-width:0;">
+          <h1 class="title-strong">{{ p.brand }}</h1>
+          <p class="muted" style="margin-top:6px;">{{ p.tagline }}</p>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+          <a href="{{ url_for('main.products') }}" class="btn" aria-label="Products" title="Products">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 0 0 2 2h14V7L12 3 3 7z"/><path d="M12 3v10"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; margin-top:14px;">
+        {% if p.avatar %}
+          <img src="{{ p.avatar }}" alt="avatar" class="avatar">
+        {% else %}
+          <div class="avatar" style="display:grid;place-items:center;background:rgba(255,255,255,.02);">👤</div>
         {% endif %}
       </div>
-    </div>
 
-    {% if products %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-        {% for pdt in products %}
-        <article class="glass overflow-hidden">
-          <div class="w-full" style="aspect-ratio:16/10; background:rgba(255,255,255,.05)">
-            {% if pdt.photo %}
-              <img src="{{ pdt.photo }}" alt="" class="w-full h-full object-cover">
-            {% endif %}
+      <!-- Quick actions -->
+      <div style="margin-top:14px;">
+        <div class="actions-grid">
+          <a class="btn" href="tel:{{ p.phone_raw }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="muted"><path d="M2.5 5.5c0-1.1.9-2 2-2h2c.8 0 1.5.5 1.8 1.2l1 2.4c.3.7.1 1.5-.4 2l-1.1 1.1a15 15 0 0 0 7 7l1.1-1.1c.5-.5 1.3-.7 2-.4l2.4 1c.7.3 1.2 1 1.2 1.8v2c0 1.1-.9 2-2 2h-1A18.5 18.5 0 0 1 3.5 6.5v-1Z"/></svg>
+            <div style="margin-left:6px;">Call</div>
+          </a>
+
+          <a class="btn" href="https://wa.me/{{ p.phone_raw|replace('+','') }}?text=Hi%20{{ p.brand|replace(' ','%20') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="muted"><path d="M20.52 3.48A10.06 10.06 0 0 0 12 0C5.37 0 .02 5.35.02 12c0 2.11.55 4.14 1.6 5.95L0 24l6.2-1.62A11.9 11.9 0 0 0 12 24C18.63 24 24 18.65 24 12a10.06 10.06 0 0 0-3.48-8.52ZM12 22a9.9 9.9 0 0 1-5.05-1.4l-.36-.21-3.67.96.98-3.57-.23-.37A9.95 9.95 0 1 1 22 12 9.98 9.98 0 0 1 12 22Zm5.22-7.32c-.29-.15-1.69-.83-1.95-.93-.26-.1-.45-.15-.64.15-.19.29-.74.93-.91 1.12-.17.19-.34.22-.63.08-.29-.15-1.23-.45-2.34-1.44-.86-.76-1.43-1.7-1.6-1.99-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.15-.17.19-.29.29-.48.10-.19.05-.36-.03-.51-.08-.15-.64-1.54-.88-2.1-.23-.54-.47-.47-.64-.48h-.55c-.19 0-.51.08-.77.37-.26.29-1.01.99-1.01 2.42 0 1.43 1.03 2.81 1.17 3 .15.19 2.03 3.1 4.9 4.34.69.3 1.22.48 1.64.61.69.22 1.31.19 1.8.12.55-.08 1.69-.69 1.93-1.36.24-.67.24-1.25.17-1.36-.07-.11-.26-.19-.55-.34Z"/></svg>
+            <div style="margin-left:6px;">WhatsApp</div>
+          </a>
+
+          <a class="btn" href="mailto:{{ p.email }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="muted"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"/><path d="M3 7l9 7 9-7"/></svg>
+            <div style="margin-left:6px;">Email</div>
+          </a>
+
+          <a class="btn" href="{{ p.maps_link }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="muted"><path d="M12 22s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="11" r="3"/></svg>
+            <div style="margin-left:6px;">Maps</div>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Social / Contact -->
+    <section style="margin-top:14px; display:grid; gap:12px; grid-template-columns:1fr;">
+      <div class="glass" style="padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="chip">Social</div>
+          <div class="muted">Follow us</div>
+        </div>
+        <div class="social-grid" style="margin-top:12px;">
+          <a class="btn btn--ghost" href="{{ p.instagram }}">Instagram</a>
+          <a class="btn btn--ghost" href="{{ p.facebook }}">Facebook</a>
+          <a class="btn btn--ghost" href="{{ p.youtube }}">YouTube</a>
+          <a class="btn btn--ghost" href="{{ p.map_review }}">Map Review</a>
+        </div>
+        <a class="btn btn--ghost" href="{{ p.wa_group }}" style="margin-top:12px; display:block;">Join WhatsApp Group</a>
+      </div>
+
+      <div class="glass" style="padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="chip">Contact Card</div>
+          <div class="muted">Save or share</div>
+        </div>
+        <div class="contact-grid" style="margin-top:12px;">
+          <button class="btn" onclick="downloadVCF()">Add to Contacts</button>
+          <button class="btn" id="shareBtn">Share Profile</button>
+        </div>
+        <div class="muted" style="margin-top:10px;">Saved name: <b>{{ p.brand }}</b> • {{ p.phone_display }}</div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section style="margin-top:14px;" class="glass">
+      <div style="padding:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="chip">Recent Products</div>
+          <div class="muted">Tap a card to view details</div>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end; align-items:center;">
+          <a class="btn" href="{{ url_for('main.products') }}">All Categories</a>
+
+          {% if admin %}
+            <button class="btn btn--primary" onclick="openAdd()">➕ Add Product</button>
+          {% else %}
+            <button class="btn" onclick="openPin()">🔑</button>
+          {% endif %}
+        </div>
+
+        <div class="products-grid" style="margin-top:12px;">
+          {% if products %}
+            {% for pdt in products %}
+            <article class="product-card" tabindex="0"
+                     data-id="{{ pdt.id }}"
+                     data-title="{{ pdt.title|lower }}"
+                     data-desc="{{ pdt.desc|lower }}"
+                     data-cat="{{ pdt.category }}"
+                     data-full-title="{{ pdt.title|e }}"
+                     data-full-desc="{{ pdt.desc|e }}"
+                     data-photo="{{ pdt.photo|e }}">
+              <div style="background:rgba(255,255,255,.02);">
+                {% if pdt.photo %}
+                  <img src="{{ pdt.photo }}" alt="{{ pdt.title }}" class="product-photo">
+                {% else %}
+                  <div class="product-photo" style="display:grid;place-items:center;color:var(--muted);">No Image</div>
+                {% endif %}
+              </div>
+
+              <div class="product-body">
+                <div class="title-clamp" data-role="title">{{ pdt.title }}</div>
+                <div class="desc-clamp" data-role="desc" style="margin-top:6px;">{{ pdt.desc }}</div>
+
+                <div style="margin-top:6px;" class="meta">Category: {{ pdt.category }} • #{{ pdt.id }}</div>
+
+                <div class="card-actions" style="margin-top:8px;">
+                  <a class="btn" target="_blank"
+                     href="https://wa.me/{{ p.phone_raw|replace('+','') }}?text={{ ('I am interested in: ' ~ pdt.title)|urlencode }}"
+                     onclick="event.stopPropagation()">WhatsApp</a>
+
+                  {% if admin %}
+                  <a class="btn" href="{{ url_for('main.products', edit=pdt.id) }}" onclick="event.stopPropagation()">Edit</a>
+
+                  <!-- Per-card delete form uses path param: /delete_product/<int:pid> -->
+                  <form method="post" action="{{ url_for('main.delete_product_route', pid=pdt.id) }}" style="margin-left:auto;" onsubmit="event.stopPropagation(); return confirm('Delete this product?');">
+                    <button class="btn" type="submit" style="background:rgba(255,80,80,.12); border-color:rgba(255,80,80,.16);">Delete</button>
+                  </form>
+
+                  {% else %}
+                  <a class="btn" href="{{ url_for('main.profile') }}" onclick="event.stopPropagation()">Profile</a>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+            {% endfor %}
+          {% else %}
+            <div style="padding:12px;" class="muted">No products yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+
+
+  <!-- Product detail modal (card click opens this) -->
+  <div id="detailModal" class="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-grid">
+        <div>
+          <img id="detailPhoto" class="photo-large" src="" alt="Product photo" />
+        </div>
+        <div class="modal-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div class="chip">{{ p.brand }}</div>
+              <div class="meta">Product Detail</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="closeDetail" class="close-x" title="Close">✕</button>
+            </div>
           </div>
-          <div class="p-3">
-            <div class="font-bold text-base">{{ pdt.title }}</div>
-            <div class="text-xs text-slate-300/85 mt-1">{{ pdt.desc }}</div>
-            <div class="text-[11px] text-cyan-300 mt-1">Category: {{ pdt.category }}</div>
-            <a class="btn-glass mt-2 inline-block"
-               href="https://wa.me/918653568180?text={{ ('I am interested in: ' ~ pdt.title)|urlencode }}">WhatsApp</a>
+
+          <h2 id="detailTitle" class="detail-title"></h2>
+          <div id="detailMeta" class="meta"></div>
+          <div id="detailDesc" class="detail-desc"></div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <a id="detailWa" class="btn btn--primary" target="_blank" href="#">WhatsApp</a>
+            <a id="detailProfile" class="btn" href="{{ url_for('main.profile') }}">Profile</a>
 
             {% if admin %}
-            <div class="flex gap-2 mt-2">
-              <a class="btn-glass flex-1 text-center" href="{{ url_for('main.products', edit=pdt.id) }}">Edit</a>
-              <form method="post" action="{{ url_for('main.delete_product_route', pid=pdt.id) }}" class="flex-1">
-                <button class="w-full btn-glass bg-red-600/30 border-red-500/40">Delete</button>
-              </form>
-            </div>
+            <!-- IMPORTANT: action starts as '#' (no placeholder). JS will set action on openDetail -->
+            <form id="detailDeleteForm" method="post" action="#" style="margin:0;">
+              <button id="detailDeleteBtn" class="btn" type="submit" style="background:rgba(255,80,80,.12); border-color:rgba(255,80,80,.18);" onclick="return confirm('Delete this product?');">Delete</button>
+            </form>
             {% endif %}
           </div>
-        </article>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals (pin/add) -->
+  <dialog id="pinModal" class="modal-dialog">
+    <form method="post" action="{{ url_for('main.login') }}" class="glass" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="chip">Admin Login</div>
+        <button type="button" class="btn" onclick="closePin()">✕</button>
+      </div>
+      <p class="muted" style="margin-top:10px;">Enter PIN to manage products.</p>
+      <input type="password" name="pin" placeholder="Enter PIN" required>
+      <button class="btn btn--primary">Login</button>
+    </form>
+  </dialog>
+
+  <dialog id="addModal" class="modal-dialog">
+    <form method="post" action="{{ url_for('main.add_product_route') }}" class="glass" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="chip">Add Product</div>
+        <button type="button" class="btn" onclick="closeAdd()">✕</button>
+      </div>
+      <div style="display:grid; gap:8px; margin-top:12px;">
+        <select name="category" required>
+          {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+        <input name="title" required placeholder="Product Title">
+        <input name="photo" type="url" placeholder="Image URL (optional)">
+        <textarea name="desc" placeholder="Short Description (optional)"></textarea>
+      </div>
+      <button class="btn btn--primary">Save</button>
+    </form>
+  </dialog>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap" aria-live="polite">
+        {% for category, msg in messages %}
+          <div class="flash {% if category == 'success' %}success{% elif category == 'error' %}error{% else %}info{% endif %}">{{ msg }}</div>
         {% endfor %}
       </div>
-    {% else %}
-      <div class="mt-3 text-sm text-slate-300/85">No products yet.</div>
     {% endif %}
-  </section>
+  {% endwith %}
 
-</div>
-
-<!-- Admin floating button -->
-{% if not admin %}
-<button class="admin-pill chip" onclick="openPin()">Admin</button>
-{% else %}
-<a class="admin-pill chip" href="{{ url_for('main.logout') }}">Logout</a>
-{% endif %}
-
-<!-- PIN Modal -->
-<dialog id="pinModal" class="modal">
-  <form method="post" action="{{ url_for('main.login') }}" class="glass p-5 w-[92%] max-w-sm">
-    <div class="flex items-center justify-between">
-      <div class="chip">Admin Login</div>
-      <button type="button" class="text-slate-300" onclick="closePin()">✕</button>
-    </div>
-    <p class="text-sm text-slate-300/85 mt-2">Enter PIN to manage products.</p>
-    <input type="password" name="pin" class="mt-3 w-full px-3 py-2 rounded text-black" placeholder="Enter PIN" required>
-    <button class="btn-glass mt-3 w-full">Login</button>
-  </form>
-</dialog>
-
-<!-- Add Modal -->
-<dialog id="addModal" class="modal">
-  <form method="post" action="{{ url_for('main.add_product_route') }}" class="glass p-5 w-[92%] max-w-lg">
-    <div class="flex items-center justify-between">
-      <div class="chip">Add Product</div>
-      <button type="button" class="text-slate-300" onclick="closeAdd()">✕</button>
-    </div>
-    <div class="grid gap-2 mt-3">
-      <select name="category" class="px-3 py-2 rounded text-black">
-        {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-      </select>
-      <input name="title" required placeholder="Product Title" class="px-3 py-2 rounded text-black">
-      <input name="photo" type="url" placeholder="Image URL (optional)" class="px-3 py-2 rounded text-black">
-      <textarea name="desc" placeholder="Short Description (optional)" class="px-3 py-2 rounded text-black h-28"></textarea>
-    </div>
-    <button class="btn-glass mt-3 w-full">Save</button>
-  </form>
-</dialog>
-
-<!-- Flash messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="fixed bottom-3 right-3 space-y-2 z-50">
-      {% for category, msg in messages %}
-        <div class="px-4 py-2 rounded text-white
-          {% if category == 'success' %} bg-green-600
-          {% elif category == 'error' %} bg-red-600
-          {% else %} bg-blue-600 {% endif %}">
-          {{ msg }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
-
-
-
-
-<!-- Fixed Bottom Nav (Glass / Neo) -->
-<nav class="fixed bottom-3 inset-x-3 z-50">
-  <div class="flex items-center justify-between gap-2 rounded-2xl
-              bg-white/10 backdrop-blur-md border border-white/15
-              px-3 py-2 shadow-[0_10px_30px_rgba(0,0,0,.35)]">
-
+  <!-- Bottom nav -->
+<nav class="bottom-nav" aria-hidden="false">
+  <div class="nav-wrap">
     <!-- Call -->
-    <a href="tel:+918653568180"
-       class="flex flex-col items-center justify-center gap-1 flex-1
-              rounded-xl px-3 py-2 hover:bg-white/10 transition">
-      <!-- phone icon -->
-      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M2.5 5.5c0-1.1.9-2 2-2h2c.8 0 1.5.5 1.8 1.2l1 2.4c.3.7.1 1.5-.4 2l-1.1 1.1a15 15 0 0 0 7 7l1.1-1.1c.5-.5 1.3-.7 2-.4l2.4 1c.7.3 1.2 1 1.2 1.8v2c0 1.1-.9 2-2 2h-1A18.5 18.5 0 0 1 3.5 6.5v-1Z"/>
-      </svg>
-      <span class="text-[11px] font-semibold">Call</span>
+    <a href="tel:{{ p.phone_raw }}" class="nav-item">
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M22 16.92V21a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3 5.18 2 2 0 0 1 5 3h4.09a1 1 0 0 1 1 .75 12.05 12.05 0 0 0 .7 2.11 1 1 0 0 1-.23 1.11l-1.85 1.85a16 16 0 0 0 7.16 7.16l1.85-1.85a1 1 0 0 1 1.11-.23 12.05 12.05 0 0 0 2.11.7 1 1 0 0 1 .75 1z"></path>
+        </svg>
+      </div>
+      <div class="nav-label">Call</div>
     </a>
 
     <!-- WhatsApp -->
-    <a href="https://wa.me/918653568180?text=Hi%20GameX%20PC%20Hub"
-       class="flex flex-col items-center justify-center gap-1 flex-1
-              rounded-xl px-3 py-2 hover:bg-white/10 transition">
-      <!-- whatsapp icon -->
-      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
-        <path d="M20.52 3.48A10.06 10.06 0 0 0 12 0C5.37 0 .02 5.35.02 12c0 2.11.55 4.14 1.6 5.95L0 24l6.2-1.62A11.9 11.9 0 0 0 12 24C18.63 24 24 18.65 24 12a10.06 10.06 0 0 0-3.48-8.52ZM12 22a9.9 9.9 0 0 1-5.05-1.4l-.36-.21-3.67.96.98-3.57-.23-.37A9.95 9.95 0 1 1 22 12 9.98 9.98 0 0 1 12 22Zm5.22-7.32c-.29-.15-1.69-.83-1.95-.93-.26-.1-.45-.15-.64.15-.19.29-.74.93-.91 1.12-.17.19-.34.22-.63.08-.29-.15-1.23-.45-2.34-1.44-.86-.76-1.43-1.7-1.6-1.99-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.03-.51-.08-.15-.64-1.54-.88-2.1-.23-.54-.47-.47-.64-.48h-.55c-.19 0-.51.08-.77.37-.26.29-1.01.99-1.01 2.42 0 1.43 1.03 2.81 1.17 3 .15.19 2.03 3.1 4.9 4.34.69.3 1.22.48 1.64.61.69.22 1.31.19 1.8.12.55-.08 1.69-.69 1.93-1.36.24-.67.24-1.25.17-1.36-.07-.11-.26-.19-.55-.34Z"/>
-      </svg>
-      <span class="text-[11px] font-semibold">WhatsApp</span>
+<!-- WhatsApp -->
+<a href="{{ p.wa_group }}" target="_blank" class="nav-item">
+  <div class="nav-icon-wrap whatsapp-icon">
+    <svg width="24" height="24" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M132 380l12-44a140 140 0 1 1 51 49l-45 11z" stroke="white" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M312 312c-8 8-24 8-33 3-11-6-24-10-33-18-10-9-22-21-28-33-5-9-5-25 3-33 5-4 8-7 13-7 3 0 6 1 8 2l14 18c2 3 2 5 1 7-1 3-2 5-3 7l-2 3c-2 2-2 4 0 7a98 98 0 0 0 32 25c3 2 6 1 8 0l3-2c2-1 4-2 7-3 2-1 4-1 7 1l17 14c2 2 3 4 3 7 0 5-3 8-7 13z" fill="white"/>
+    </svg>
+  </div>
+  <div class="nav-label">WhatsApp</div>
+</a>
+
+    <!-- Location -->
+    <a href="{{ p.map_review }}" target="_blank" class="nav-item">
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
+          <circle cx="12" cy="9" r="2.5"></circle>
+        </svg>
+      </div>
+      <div class="nav-label">Location</div>
     </a>
 
     <!-- Email -->
-    <a href="mailto:saidmessi4321@gmail.com"
-       class="flex flex-col items-center justify-center gap-1 flex-1
-              rounded-xl px-3 py-2 hover:bg-white/10 transition">
-      <!-- mail icon -->
-      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6">
-        <rect x="3" y="5" width="18" height="14" rx="2" ry="2"/>
-        <path d="M3 7l9 7 9-7"/>
-      </svg>
-      <span class="text-[11px] font-semibold">Email</span>
+    <a href="mailto:{{ p.email }}" class="nav-item">
+      <div class="nav-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+      </div>
+      <div class="nav-label">Email</div>
     </a>
-
-    <!-- Map -->
-    <a href="https://maps.app.goo.gl/UdeBHbvDXAYmRU2D7"
-       class="flex flex-col items-center justify-center gap-1 flex-1
-              rounded-xl px-3 py-2 hover:bg-white/10 transition">
-      <!-- map-pin icon -->
-      <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 22s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/>
-        <circle cx="12" cy="11" r="3"/>
-      </svg>
-      <span class="text-[11px] font-semibold">Map</span>
-    </a>
-
   </div>
 </nav>
 
-<!-- spacer so nav doesn't cover content on mobile -->
-<div class="h-20"></div>
-
+  <div class="footer-space" aria-hidden="true"></div>
 
 <script>
-  // Share profile (mobile-friendly)
-  document.getElementById("shareBtn")?.addEventListener("click", async () => {
-    const url = location.href;
-    const data = {title: "{{ p.brand }}", text: "Check our profile & products", url};
-    if (navigator.share) { try { await navigator.share(data); } catch(e){} }
-    else { try { await navigator.clipboard.writeText(url); alert("Link copied!"); } catch(e){ alert(url); } }
-  });
+(function(){
+  const $ = (s, ctx=document) => ctx.querySelector(s);
+  const $$ = (s, ctx=document) => Array.from((ctx||document).querySelectorAll(s));
 
-  // vCard builder
-  function downloadVCF(){
-    const v = [
-      "BEGIN:VCARD","VERSION:3.0",
-      "N:Hub;GameX;;;",
-      "FN:{{ p.brand }}",
-      "ORG:{{ p.brand }}",
-      "TITLE:{{ p.owner_title }}",
-      "TEL;TYPE=CELL,VOICE:{{ p.phone_raw }}",
-      "EMAIL:{{ p.email }}",
-      "URL:"+location.origin,
-      "ADR;TYPE=WORK:;;{{ p.address }};;;;",
-      "END:VCARD"
-    ].join("\\n");
-    const blob = new Blob([v], {type:"text/vcard"});
-    const a = Object.assign(document.createElement("a"), {href:URL.createObjectURL(blob), download:"GameX-PC-Hub.vcf"});
-    document.body.appendChild(a); a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 500); a.remove();
+  const cards = $$('.product-card');
+  const detailModal = $('#detailModal');
+  const detailPhoto = $('#detailPhoto');
+  const detailTitle = $('#detailTitle');
+  const detailMeta = $('#detailMeta');
+  const detailDesc = $('#detailDesc');
+  const detailWa = $('#detailWa');
+  const detailDeleteForm = $('#detailDeleteForm');
+
+  // base delete URL with pid=0 (safe server-side generated)
+  const deleteUrlBase = "{{ url_for('main.delete_product_route', pid=0) }}"; // e.g. "/delete_product/0"
+
+  function openDetail(card){
+    const id = (card.getAttribute('data-id') || '').toString();
+    const title = card.getAttribute('data-full-title') || card.getAttribute('data-title') || '';
+    const desc = card.getAttribute('data-full-desc') || card.getAttribute('data-desc') || '';
+    const cat = card.getAttribute('data-cat') || '';
+    const photo = card.getAttribute('data-photo') || '';
+
+    detailTitle.textContent = title;
+    detailMeta.textContent = (cat ? 'Category: ' + cat : '') + (id ? ' • #' + id : '');
+    detailDesc.textContent = desc || '';
+
+    if(photo){
+      detailPhoto.src = photo;
+      detailPhoto.alt = title;
+    } else {
+      detailPhoto.src = '';
+      detailPhoto.alt = 'No image';
+      detailPhoto.style.background = 'rgba(255,255,255,.02)';
+    }
+
+    // whatsapp link
+    const waNumber = "{{ p.phone_raw|replace('+','') }}";
+    if(detailWa) detailWa.href = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent('I am interested in: ' + title + (id ? ' (ID: ' + id + ')' : ''));
+
+    // safely compute delete action by replacing trailing '/0' with '/<id>'
+    if(detailDeleteForm){
+      if(!id){
+        // no id: ensure action not set to invalid
+        detailDeleteForm.action = '#';
+      } else {
+        const safeAction = deleteUrlBase.replace(/\/0$/, '/' + encodeURIComponent(id));
+        detailDeleteForm.action = safeAction;
+      }
+    }
+
+    detailModal.classList.add('show');
+    detailModal.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
   }
 
-  // Modals
-  const pinModal = document.getElementById("pinModal");
-  const addModal = document.getElementById("addModal");
-  function openPin(){ pinModal.setAttribute("open",""); }
-  function closePin(){ pinModal.removeAttribute("open"); }
-  function openAdd(){ addModal.setAttribute("open",""); }
-  function closeAdd(){ addModal.removeAttribute("open"); }
-  window.openPin = openPin; window.openAdd = openAdd; window.closeAdd = closeAdd; window.closePin = closePin;
+  function closeModal(){
+    detailModal.classList.remove('show');
+    detailModal.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+
+  cards.forEach(c=>{
+    c.addEventListener('click', ()=> openDetail(c));
+    c.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(c); }});
+  });
+
+  $('#closeDetail') && $('#closeDetail').addEventListener('click', closeModal);
+  detailModal && detailModal.addEventListener('click', (e)=> { if(e.target === detailModal) closeModal(); });
+  document.addEventListener('keydown', (e)=> { if(e.key === 'Escape' && detailModal.classList.contains('show')) closeModal(); });
+
+  // IMPORTANT: prevent submission when action is not properly set
+  if(detailDeleteForm){
+    detailDeleteForm.addEventListener('submit', function(e){
+      const action = (this.action || '').toString();
+      // If action absent, or still points to /0, or contains placeholder, prevent submit
+      if(!action || action.endsWith('/0') || action.includes('__PID__') || action === '#' ){
+        e.preventDefault();
+        alert('Select a product first (open a product and then click Delete).');
+        return false;
+      }
+      // otherwise allow submit and the browser will POST to e.g. /delete_product/23
+      // no further JS needed
+    });
+  }
+
+  // dialogs open/close helpers
+  const pinModal = document.getElementById('pinModal');
+  const addModal = document.getElementById('addModal');
+  window.openPin = function(){ try{ if(typeof pinModal.showModal === 'function') pinModal.showModal(); else { pinModal.setAttribute('open',''); pinModal.style.display='block'; } }catch(e){ pinModal.setAttribute('open',''); pinModal.style.display='block'; } };
+  window.closePin = function(){ try{ pinModal.close(); }catch(e){ pinModal.removeAttribute('open'); pinModal.style.display='none'; } };
+  window.openAdd = function(){ try{ if(typeof addModal.showModal === 'function') addModal.showModal(); else { addModal.setAttribute('open',''); addModal.style.display='block'; } }catch(e){ addModal.setAttribute('open',''); addModal.style.display='block'; } };
+  window.closeAdd = function(){ try{ addModal.close(); }catch(e){ addModal.removeAttribute('open'); addModal.style.display='none'; } };
+
+  // vcf
+  window.downloadVCF = function(){
+    const name = "{{ p.brand|e }}";
+    const phone = "{{ p.phone_display|e }}";
+    const email = "{{ p.email|e }}";
+    let vcf = 'BEGIN:VCARD\\nVERSION:3.0\\nFN:' + name + '\\n';
+    if(phone) vcf += 'TEL;TYPE=CELL:' + phone + '\\n';
+    if(email) vcf += 'EMAIL;TYPE=INTERNET:' + email + '\\n';
+    vcf += 'END:VCARD';
+    const blob = new Blob([vcf], {type:'text/vcard'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = (name || 'contact') + '.vcf'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1500);
+  };
+
+  // share
+  (function(){
+    const btn = document.getElementById('shareBtn');
+    if(!btn) return;
+    btn.addEventListener('click', async function(){
+      const shareData = { title: "{{ p.brand|e }}", text:"{{ p.tagline|e }}", url: window.location.href };
+      if(navigator.share){ try{ await navigator.share(shareData); }catch(e){} } else { try{ await navigator.clipboard.writeText(shareData.url); alert('Link copied'); }catch(e){ prompt('Copy link', shareData.url); } }
+    });
+  })();
+
+  // auto-hide flash
+  (function(){
+    const flashes = document.querySelectorAll('.flash');
+    if(flashes.length){ setTimeout(()=> flashes.forEach(f => f.style.opacity = '0'), 4500); }
+  })();
+
+})();
 </script>
 </body>
 </html>
