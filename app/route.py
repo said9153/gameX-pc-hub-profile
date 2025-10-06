@@ -1,5 +1,10 @@
-import os, json, time
+# app/route.py
+import os
+import time
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+
+# Import SQLAlchemy models/session helpers
+from .models import Product, create_session, get_engine
 
 main = Blueprint("main", __name__, template_folder="templates")
 
@@ -25,104 +30,124 @@ PROFILE = {
 CATEGORIES = ["Second Hand", "Computer", "Printer", "Tabs", "Accessories"]
 ADMIN_PIN = "8180"
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data.json")
+# Ensure engine available (models/__init__ or models.py handles DATABASE_URL)
+_engine = get_engine()
 
-def _default():
-    return {"products": [], "seq": 1}
 
-def _repair_and_return_default():
-    """If file invalid/empty, rewrite a clean default JSON and return it."""
-    payload = _default()
-    try:
-        with open(DATA_PATH, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-    except Exception:
-        # read-only FS fallback: do nothing, just return default in-memory
-        pass
-    return payload
-
-def _load():
-    """Safe load: if missing/empty/invalid -> auto repair & return default."""
-    try:
-        with open(DATA_PATH, "r", encoding="utf-8") as f:
-            txt = f.read().strip()
-            if not txt:
-                return _repair_and_return_default()
-            return json.loads(txt)
-    except Exception:
-        return _repair_and_return_default()
-
-def _save(payload):
-    """Safe save with atomic temp write, then replace."""
-    tmp = DATA_PATH + ".tmp"
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, DATA_PATH)
-    except Exception:
-        # last resort: try direct write
-        try:
-            with open(DATA_PATH, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-        except Exception:
-            # read-only FS: ignore (in-memory only)
-            pass
-
+# ----------------- Database helpers (SQLAlchemy) -----------------
 def all_products():
-    return _load().get("products", [])
+    """
+    Return list of products as dicts ordered by created_at desc.
+    Keys: id, title, desc, photo, category, created_at (int timestamp)
+    """
+    sess = create_session(_engine)
+    try:
+        rows = sess.query(Product).order_by(Product.created_at.desc()).all()
+        result = []
+        for r in rows:
+            result.append({
+                "id": r.id,
+                "title": r.title,
+                "desc": r.desc,
+                "photo": r.photo,
+                "category": r.category,
+                "created_at": int(r.created_at.timestamp()) if r.created_at else None
+            })
+        return result
+    finally:
+        sess.close()
 
-def next_id():
-    data = _load()
-    nid = int(data.get("seq", 1))
-    data["seq"] = nid + 1
-    _save(data)
-    return nid
 
 def add_product(title, desc, photo, category):
-    p = {
-        "id": next_id(),
-        "title": (title or "").strip(),
-        "desc": (desc or "").strip(),
-        "photo": (photo or "").strip(),
-        "category": category if category in CATEGORIES else CATEGORIES[0],
-        "created_at": int(time.time()),
-    }
-    data = _load()
-    data.setdefault("products", []).insert(0, p)
-    _save(data)
-    return p
+    """
+    Create a product and return the created product dict.
+    """
+    sess = create_session(_engine)
+    try:
+        p = Product(
+            title=(title or "").strip(),
+            desc=(desc or "").strip(),
+            photo=(photo or "").strip(),
+            category=category if category in CATEGORIES else (CATEGORIES[0] if CATEGORIES else "")
+        )
+        sess.add(p)
+        sess.commit()
+        sess.refresh(p)
+        return {
+            "id": p.id,
+            "title": p.title,
+            "desc": p.desc,
+            "photo": p.photo,
+            "category": p.category,
+            "created_at": int(p.created_at.timestamp()) if p.created_at else None
+        }
+    finally:
+        sess.close()
+
 
 def update_product(pid, title, desc, photo, category):
-    data = _load()
-    for p in data.get("products", []):
-        if p["id"] == pid:
-            p["title"] = (title or "").strip()
-            p["desc"] = (desc or "").strip()
-            p["photo"] = (photo or "").strip()
-            p["category"] = category if category in CATEGORIES else CATEGORIES[0]
-            _save(data)
-            return True
-    return False
+    """
+    Update an existing product. Return True if updated, False if not found.
+    """
+    sess = create_session(_engine)
+    try:
+        r = sess.query(Product).filter_by(id=pid).first()
+        if not r:
+            return False
+        r.title = (title or "").strip()
+        r.desc = (desc or "").strip()
+        r.photo = (photo or "").strip()
+        r.category = category if category in CATEGORIES else (CATEGORIES[0] if CATEGORIES else "")
+        sess.commit()
+        return True
+    finally:
+        sess.close()
+
 
 def delete_product(pid):
-    data = _load()
-    before = len(data.get("products", []))
-    data["products"] = [p for p in data.get("products", []) if p["id"] != pid]
-    _save(data)
-    return len(data["products"]) < before
+    """
+    Delete product by id. Return True if deleted, False if not found.
+    """
+    sess = create_session(_engine)
+    try:
+        r = sess.query(Product).filter_by(id=pid).first()
+        if not r:
+            return False
+        sess.delete(r)
+        sess.commit()
+        return True
+    finally:
+        sess.close()
+
 
 def get_product(pid):
-    for p in all_products():
-        if p["id"] == pid:
-            return p
-    return None
+    """
+    Get a product dict by id or None.
+    """
+    sess = create_session(_engine)
+    try:
+        r = sess.query(Product).filter_by(id=pid).first()
+        if not r:
+            return None
+        return {
+            "id": r.id,
+            "title": r.title,
+            "desc": r.desc,
+            "photo": r.photo,
+            "category": r.category,
+            "created_at": int(r.created_at.timestamp()) if r.created_at else None
+        }
+    finally:
+        sess.close()
 
-# -------- routes below (unchanged from my last message) --------
+
+# -------- routes below (keeps your templates & behaviour) --------
 @main.route("/")
 def profile():
     products = all_products()[:9]
     return render_template("profile.html", p=PROFILE, products=products,
                            categories=CATEGORIES, admin=session.get("admin", False))
+
 
 @main.route("/products")
 def products():
@@ -139,6 +164,7 @@ def products():
     return render_template("products.html", p=PROFILE, products=items, categories=CATEGORIES,
                            selected=selected, edit_item=edit_item, admin=session.get("admin", False))
 
+
 @main.route("/login", methods=["POST"])
 def login():
     pin = (request.form.get("pin") or "").strip()
@@ -149,11 +175,13 @@ def login():
         flash("❌ Wrong PIN", "error")
     return redirect(request.referrer or url_for("main.profile"))
 
+
 @main.route("/logout")
 def logout():
     session.pop("admin", None)
     flash("ℹ️ Logged out", "info")
     return redirect(request.referrer or url_for("main.profile"))
+
 
 @main.route("/add_product", methods=["POST"])
 def add_product_route():
@@ -171,6 +199,7 @@ def add_product_route():
     flash("✅ Product added", "success")
     return redirect(request.referrer or url_for("main.profile"))
 
+
 @main.route("/edit_product/<int:pid>", methods=["POST"])
 def edit_product_route(pid):
     if not session.get("admin"):
@@ -186,6 +215,7 @@ def edit_product_route(pid):
     ok = update_product(pid, title, desc, photo, category)
     flash("✅ Product updated" if ok else "❌ Product not found", "success" if ok else "error")
     return redirect(url_for("main.products"))
+
 
 @main.route("/delete_product/<int:pid>", methods=["POST"])
 def delete_product_route(pid):
